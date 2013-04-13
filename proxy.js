@@ -8,7 +8,7 @@
 // set time:
 //   curl -X POST "http://localhost:8080/raw?command=0T333333"
 //
-// upload first page from a tti page:
+// upload first page from a .tti page:
 //
 // run a custom command:
 //
@@ -55,20 +55,21 @@ var okhandler = null;
 var commandqueue = [];
 
 function popcommand() {
-  if (commandqueue.length>0) {
+  if (commandqueue.length > 0) {
     var command = commandqueue.splice(0,1)[0];
     sendcommand(command, popcommand);
   } else {
-    setTimeout(popcommand, 20);
+    setTimeout(popcommand, 15);
   }
 };
 
 function queuecommand(command) {
   if (commandqueue.length > MAXQUEUELENGTH) {
-    queuecommand = queuecommand.splice(queuecommand.length-MAXQUEUELENGTH);
+    console.log('QUEUE OVERFLOW');
+    queuecommand.splice(0, queuecommand.length - MAXQUEUELENGTH);
   }
   if (command) {
-    console.log('QUEUE:',command);
+    console.log('QUEUE:', command);
     commandqueue.push(command);
   }
 }
@@ -80,21 +81,25 @@ function setokhandler(callback) {
 function sendcommand(command, callback) {
   // if (callback) setokhandler(callback);
 
+  console.log('sendcommand', command);
+
   var datacommand = '';
   if (command.page && command.page > 0) {
     var shortpage = PAGEMAPPING[command.page];
     if (shortpage) {
-      datacommand += '\x0E\x0E0JW,'+shortpage+'\x0D';
+      // console.log('CHANNEL SHORT', shortpage);
+      datacommand += '\x0E\x0E0JA,'+shortpage+'\x0D';
     }
   }
   if (command.command) {
     datacommand += '\x0E\x0E'+command.command+'\x0D';
   }
 
-  console.log('SENDING: '+datacommand);
+  console.log('SENDING: '+JSON.stringify(datacommand));
   serialPort.write(new Buffer(datacommand, 'ascii'), function(err, results) {
-    // console.log('err',err,', results', results);
+    console.log('err',err,', results', results);
   });
+
   // if (okhandler)
   setTimeout(callback, 10);
 }
@@ -103,9 +108,9 @@ serialPort.on("open", function () {
   // console.log('open');
 
   serialPort.on('data', function(data) {
-    console.log('GOT', data);
     if (data) {
       var ts = data.toString().trim();
+      // console.log('GOT', data);
       if (ts == '0OK0' || ts == '1OK0')  {
         var t = okhandler;
         setTimeout(t, 0);
@@ -153,8 +158,9 @@ server.post('/raw', rawhandler);
 server.get('/raw', rawhandler);
 server.put('/raw', rawhandler);
 
-function queuetti(body) {
-  console.log('queuetti', body);
+function queuetti(body, page) {
+  console.log('queuetti on page', page);
+  console.log('queuetti body', body);
   var lines = body.split('\n');
   var pageindex = 0;
   lines.forEach(function(line) {
@@ -166,6 +172,7 @@ function queuetti(body) {
     if (pageindex < 2 && cmd[0] == 'OL') {
       // only take first page on uploaded pages
       queuecommand({
+        page: page,
         command: '0JW,'+cmd[1]+','+cmd.slice(2).join(',')
       });
     }
@@ -173,17 +180,17 @@ function queuetti(body) {
 }
 
 var ttihandler = function(req, res, next) {
-  console.log(req);
+  // console.log(req);
   if (req.params.filename)
-    queuetti(fs.readFileSync(req.params.filename, 'utf-8'));
+    queuetti(fs.readFileSync(req.params.filename, 'utf-8'), req.query.page);
   else if (req.query.file)
-    queuetti(req.query.file);
+    queuetti(req.query.file, req.query.page);
   else if (req.params.file)
-    queuetti(req.params.file);
+    queuetti(req.params.file, req.query.page);
   else if (req.query.code)
-    queuetti(req.query.code);
+    queuetti(req.query.code, req.query.page);
   else if (req.body)
-    queuetti(req.body);
+    queuetti(req.body, req.query.page);
   else
     console.error('err');
   res.send({ ok: true });
