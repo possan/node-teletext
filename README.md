@@ -8,23 +8,35 @@ Download all dependencies:
 	npm install
 
 Start service by running:
-	node proxy.js
+````bash
+node proxy.js
+````
 
 write some text to page 200:
-	curl -X POST "http://localhost:8080/tti?page=200&file=OL,1,HELLO%20WORLD"
+````bash
+curl -X POST "http://localhost:8080/tti?page=200&file=OL,1,HELLO%20WORLD"
+````
 
 set the clock to 08:10:20:
-	curl -X POST "http://localhost:8080/raw?command=0T081020"
+````bash
+curl -X POST "http://localhost:8080/raw?command=0T081020"
+````
 
 upload a .tti page:
-	php sendtti.php sample.tti
-	curl -X POST "http://localhost:8080/tti?page=200&file=OL,1,HELLO%20WORLD"
+````bash
+php sendtti.php sample.tti
+curl -X POST "http://localhost:8080/tti?page=200&file=OL,1,HELLO%20WORLD"
+````
 
 running twitfax:
-	php twitfax.php >twitter.tti
-	iconv -f iso8859-1 -t utf-8 twitter.tti >twitter2.tti
-	curl -X POST "http://localhost:8080/tti?page=200&filename=twitter2.tti"
+````bash
+php twitfax.php >twitter.tti
+iconv -f iso8859-1 -t utf-8 twitter.tti >twitter2.tti
+curl -X POST "http://localhost:8080/tti?page=200&filename=twitter2.tti"
+````
 
 run a raw custom command:
-	curl -X POST "http://localhost:8080/raw?command=0JA,2"
+````bash
+curl -X POST "http://localhost:8080/raw?command=0JA,2"
+````
 
