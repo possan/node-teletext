@@ -1,0 +1,22 @@
+{
+  "name": "node-teletext",
+  "version": "0.0.0",
+  "description": "node-teletext =============",
+  "main": "proxy.js",
+  "dependencies": {
+    "restify": "~2.4.1",
+    "serialport": "~1.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/possan/node-teletext.git"
+  },
+  "author": "Per-Olov Jernberg <possan@possan.se>",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "48fdee3ba41fbeea12cd2998fcdaa62fc4827358"
+}
