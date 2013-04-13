@@ -5,7 +5,9 @@ A restful interface to the VBit open source teletext hardware
 https://code.google.com/p/vbit/
 
 Download all dependencies:
-	npm install
+````bash
+npm install
+````
 
 Start service by running:
 ````bash
